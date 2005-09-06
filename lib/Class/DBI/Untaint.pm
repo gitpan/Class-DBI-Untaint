@@ -1,6 +1,6 @@
 package Class::DBI::Untaint;
 
-$VERSION = '0.01';
+$VERSION = '1.00';
 
 use strict;
 
@@ -8,11 +8,13 @@ use CGI::Untaint;
 use Class::DBI;
 
 sub Class::DBI::_constrain_by_untaint {
-	my ($class, $col, $string, $type) = @_;
-	$class->add_constraint(
-		untaint => $col => sub {
-			CGI::Untaint->new({ $col => +shift })->extract("-as_$type" => $col);
-		});
+  my ($class, $col, $string, $type) = @_;
+  $class->add_constraint(
+    untaint => $col => sub {
+      my $h = CGI::Untaint->new({ $col => +shift });
+      $h->extract("-as_$type" => $col);
+      !$h->error;
+    });
 }
 
 =head1 NAME
@@ -21,12 +23,12 @@ Class::DBI::Untaint - Class::DBI constraints using CGI::Untaint
 
 =head1 SYNOPSIS
 
-	use base 'Class::DBI';
+  use base 'Class::DBI';
   use Class::DBI::Untaint;
 
-	___PACKAGE__->columns(All => qw/id value entered/);
-	___PACKAGE__->constrain_column(value => Untaint => "integer");
-	___PACKAGE__->constrain_column(entered => Untaint => "date");
+  ___PACKAGE__->columns(All => qw/id value entered/);
+  ___PACKAGE__->constrain_column(value => Untaint => "integer");
+  ___PACKAGE__->constrain_column(entered => Untaint => "date");
 
 =head1 DESCRIPTION
 
@@ -46,14 +48,24 @@ L<Class::DBI>, L<CGI::Untaint>.
 
 =head1 AUTHOR
 
-Tony Bowden, E<lt>kasei@tmtm.comE<gt>. 
+Tony Bowden
 
-=head1 COPYRIGHT
+=head1 BUGS and QUERIES
 
-Copyright (C) 2004 Tony Bowden. All rights reserved.
+Please direct all correspondence regarding this module to:
+  bug-Class-DBI-Untaint@rt.cpan.org
 
-This module is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+=head1 COPYRIGHT AND LICENSE
+
+  Copyright (C) 2004-2005 Tony Bowden.
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License; either version
+  2 of the License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 =cut
 

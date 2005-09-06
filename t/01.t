@@ -6,7 +6,7 @@ use Test::More;
 
 BEGIN {
 	eval "use DBD::SQLite";
-	plan $@ ? (skip_all => 'needs DBD::SQLite for testing') : (tests => 3);
+	plan $@ ? (skip_all => 'needs DBD::SQLite for testing') : (tests => 5);
 }
 
 package My::DBI;
@@ -47,4 +47,8 @@ like $@, qr/fails 'untaint' constraint/, "Can't set a string";
 
 my $order2 = eval { My::Order->create({ itemid => 13, orders => "ten" }) };
 like $@, qr/fails 'untaint' constraint/, "Can't create with a string";
+
+my $order3 = eval { My::Order->create({ itemid => 14, orders => 0 }) };
+isa_ok $order3 => "My::Order" or diag $@;
+is $order3->orders, 0, "Create an item with no orders";
 
